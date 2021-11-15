@@ -23,25 +23,26 @@ func main() {
 		filePath := "Music/" + listOfTracks[i]
 		err := DownloadFile(filePath, fileUrl)
 		if err != nil {
-			myError := TryReconect(filePath, fileUrl)
-			notSuccessFile.WriteString(myError.Error() + "not successful!\n")
-			continue
+			resultConnection := TryReconect(filePath, fileUrl)
+			if resultConnection {
+				fmt.Println("Downloaded: " + fileUrl)
+				successFile.WriteString(listOfTracks[i] + " downloaded successfully!\n")
+				continue
+			} else {
+				notSuccessFile.WriteString(listOfTracks[i] + "downloaded not successfully!\n")
+				continue
+			}
 		}
 		fmt.Println("Downloaded: " + fileUrl)
-		successFile.WriteString(fileUrl + " downloaded successfully!\n")
+		successFile.WriteString(listOfTracks[i] + " downloaded successfully!\n")
 	}
 }
 
 //Create Logs and Music directories
 func CreateDirectories() (*os.File, *os.File) {
-	errF := os.Mkdir("Music", os.FileMode(0750))
-	if errF != nil {
-		fmt.Println(errF)
-	}
-	errSe := os.Mkdir("Logs", os.FileMode(0750))
-	if errSe != nil {
-		fmt.Println(errSe)
-	}
+	os.Mkdir("Music", os.FileMode(0750))
+	os.Mkdir("Logs", os.FileMode(0750))
+
 	successFile, errS := os.Create("./Logs/successful.txt")
 	if errS != nil {
 		fmt.Println(errS)
@@ -54,7 +55,7 @@ func CreateDirectories() (*os.File, *os.File) {
 }
 
 //Trying reconect to the server if connection lost
-func TryReconect(filePath, fileUrl string) error {
+func TryReconect(filePath, fileUrl string) bool {
 	var myError error
 	for i := 0; i < 12; i++ {
 		time.Sleep(time.Second * 5)
@@ -62,20 +63,19 @@ func TryReconect(filePath, fileUrl string) error {
 		if myError != nil {
 			fmt.Println(i+1, myError)
 		} else {
-			return myError
+			return true
 		}
 	}
 	for i := 0; i < 9; i++ {
 		myError = DownloadFile(filePath, fileUrl)
 		if myError != nil {
 			fmt.Println(i+1, myError)
-			time.Sleep(time.Minute * 1)
+			time.Sleep(time.Second * 1)
 		} else {
-			return myError
+			return true
 		}
 	}
-
-	return myError
+	return false
 }
 
 // DownloadFile download a url to a local file.
