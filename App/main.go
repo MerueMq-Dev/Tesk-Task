@@ -70,7 +70,7 @@ func TryReconect(filePath, fileUrl string) bool {
 		myError = DownloadFile(filePath, fileUrl)
 		if myError != nil {
 			fmt.Println(i+1, myError)
-			time.Sleep(time.Second * 1)
+			time.Sleep(time.Minute * 1)
 		} else {
 			return true
 		}
