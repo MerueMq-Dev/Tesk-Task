@@ -21,20 +21,14 @@ func main() {
 	for i := 0; i < len(listOfTracks); i++ {
 		fileUrl := "http://localhost:8181/" + strings.ReplaceAll(listOfTracks[i], " ", "_")
 		filePath := "Music/" + listOfTracks[i]
-		err := DownloadFile(filePath, fileUrl)
-		if err != nil {
-			resultConnection := TryReconect(filePath, fileUrl)
-			if resultConnection {
-				fmt.Println("Downloaded: " + fileUrl)
-				successFile.WriteString(listOfTracks[i] + " downloaded successfully!\n")
-				continue
-			} else {
-				notSuccessFile.WriteString(listOfTracks[i] + "downloaded not successfully!\n")
-				continue
-			}
+		isDownload := TryDownloadFile(filePath,fileUrl)
+		if isDownload {
+			fmt.Println("Downloaded: " + listOfTracks[i])
+			successFile.WriteString(listOfTracks[i] + " downloaded successfully!\n")
+		}else {
+			fmt.Println("Not downloaded: " + listOfTracks[i])
+			notSuccessFile.WriteString(listOfTracks[i] + "Not downloaded successfully!\n")
 		}
-		fmt.Println("Downloaded: " + fileUrl)
-		successFile.WriteString(listOfTracks[i] + " downloaded successfully!\n")
 	}
 }
 
@@ -55,12 +49,12 @@ func CreateDirectories() (*os.File, *os.File) {
 }
 
 //Trying reconect to the server if connection lost
-func TryReconect(filePath, fileUrl string) bool {
+func TryDownloadFile(filePath, fileUrl string) bool {
 	var myError error
 	for i := 0; i < 12; i++ {
-		time.Sleep(time.Second * 5)
 		myError = DownloadFile(filePath, fileUrl)
 		if myError != nil {
+			time.Sleep(time.Second * 5)
 			fmt.Println(i+1, myError)
 		} else {
 			return true
